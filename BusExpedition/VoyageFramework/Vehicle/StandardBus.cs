@@ -1,14 +1,17 @@
-﻿namespace VoyageFramework
+﻿using System;
+
+namespace VoyageFramework
 {
     public class StandardBus : Bus
     {
-        private int _capacity = 30;
+        private const bool HasNoToilet = false;
+        private const int StandartBusCapacity = 30;
 
         public StandardBus(string make, string plate) :
-            base(make, plate, false)
+            base(make, plate, HasNoToilet)
         { }
 
-        public override int Capacity { get => _capacity; }
+        public override int Capacity { get => StandartBusCapacity; }
 
         public override SeatInformation GetSeatInformation(int seatNumber)
         {
@@ -25,8 +28,7 @@
                     seatInformation = new SeatInformation(seatNumber, SeatSection.RightSide, SeatCategory.Window);
                     break;
                 default:
-                    seatInformation = new SeatInformation();
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(seatNumber));
             }
 
             return seatInformation;

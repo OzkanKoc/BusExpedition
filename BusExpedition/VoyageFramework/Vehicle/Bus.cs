@@ -1,7 +1,10 @@
 ﻿namespace VoyageFramework
 {
-    abstract public class Bus
+    public abstract class Bus
     {
+        public Bus(string make, bool hasToilet)
+            : this(make, string.Empty, hasToilet)
+        { }
         public Bus(string make, string plate, bool hasToilet)
         {
             Make = make;
@@ -12,6 +15,6 @@
         public string Plate { get; set; }
         public abstract int Capacity { get; }
         public bool HasToilet { get; }
-        abstract public SeatInformation GetSeatInformation(int seatNumber); 
+        public abstract SeatInformation GetSeatInformation(int seatNumber);
     }
 }

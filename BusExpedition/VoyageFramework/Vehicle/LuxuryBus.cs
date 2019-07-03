@@ -2,13 +2,14 @@
 {
     public class LuxuryBus : Bus
     {
-        private int _capacity = 30;
+        private const bool LuxuryBusHasRoilet = true;
+        private const int LuxuryBusCapacity = 20;
 
         public LuxuryBus(string make, string plate) :
-            base(make, plate, true)
+            base(make, plate, LuxuryBusHasRoilet)
         { }
 
-        public override int Capacity { get => _capacity; }
+        public override int Capacity { get => LuxuryBusCapacity; }
 
         public override SeatInformation GetSeatInformation(int seatNumber)
         {
@@ -25,7 +26,7 @@
                     seatInformation = new SeatInformation();
                     break;
             }
-        
+
             return seatInformation;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace VoyageFramework.Collections
 {
-    public class DriverCollection
+    public class DriverCollection : IEnumerable
     {
         private Driver[] _drivers = new Driver[0];
         public int Count
@@ -31,7 +32,7 @@ namespace VoyageFramework.Collections
         }
         public void Remove(Driver driver)
         {
-            for (int i = 0; i < IndexOf(driver) - 1; i++)
+            for (int i = IndexOf(driver); i < _drivers.Length - 1; i++)
             {
                 _drivers[i] = _drivers[i + 1];
             }
@@ -51,6 +52,11 @@ namespace VoyageFramework.Collections
                 }
             }
             return false;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -5,11 +5,14 @@ namespace VoyageFramework
 {
     public class BusExpedition
     {
+        private const string CodeOfLuxuryBus = "LX";
+        private const string CodeOfStandartBus = "ST";
+        private const int MinSuffixValue = 1000;
+        private const int MaxSuffixValue = 10000;
+        private const int DistancePerDriver = 400;
+        private int _codeSuffix;
         private DateTime _estimatedDepartureTime;
         private Bus _bus;
-        private HostCollection _hosts = new HostCollection();
-        private DriverCollection _drivers = new DriverCollection();
-        private TicketCollection _tickets = new TicketCollection();
 
         public BusExpedition(Route route, DateTime departureTime)
         {
@@ -17,19 +20,19 @@ namespace VoyageFramework
             Route = route;
             EstimatedDepartureTime = departureTime;
 
-        }
+            var random = new Random();
+            _codeSuffix = random.Next(MinSuffixValue, MaxSuffixValue);
 
+        }
         public string Code
         {
             get
             {
-                Random rnd = new Random();
-
-                return string.Format("{{{0}}} {{{1}}} - {2} - {3}",
-                    Route.DepartureLocation.Substring(0, 1),
-                    DepartureTime.ToString("yyMMdd"),
-                    Bus.GetType() == typeof(LuxuryBus) ? "LX" : "ST",
-                    rnd.Next(1000, 100000));
+                return string.Format("{0}{1}-{2}-{3}",
+                     Route.DepartureLocation.Substring(0, 1),
+                     DepartureTime.ToString("yyMMdd"),
+                     Bus is LuxuryBus ? CodeOfLuxuryBus : CodeOfStandartBus,
+                    _codeSuffix);
             }
         }
         public Bus Bus
@@ -38,14 +41,14 @@ namespace VoyageFramework
             set
             {
                 var bus = value;
-                if (_drivers.Count > 0)
+                if (Drivers.Count > 0)
                 {
-                    for (int i = 0; i < _drivers.Count; i++)
+                    for (int i = 0; i < Drivers.Count; i++)
                     {
-                        if ((bus is LuxuryBus && _drivers[i].LicenseType != LicenseType.HighLicense) ||
-                            (bus is StandardBus && _drivers[i].LicenseType == LicenseType.None))
+                        if ((bus is LuxuryBus && Drivers[i].LicenseType != LicenseType.HighLicense) ||
+                            (bus is StandardBus && Drivers[i].LicenseType == LicenseType.None))
                         {
-                            throw new FormatException(_drivers[i].LicenseType.ToString());
+                            throw new FormatException(Drivers[i].LicenseType.ToString());
                         }
                         else
                         {
@@ -60,44 +63,22 @@ namespace VoyageFramework
             }
         }
         public Route Route { get; }
-        public DriverCollection Drivers
-        {
-            get
-            {
-                return _drivers;
-            }
-        }
-        public HostCollection Hosts
-        {
-            get
-            {
-                return _hosts;
-            }
-        }
-        private TicketCollection Tickets
-        {
-            get
-            {
-                return _tickets;
-            }
-        }
+        public DriverCollection Drivers { get; }
+        public HostCollection Hosts { get; }
+        private TicketCollection Tickets { get; }
         public DateTime DepartureTime { get; }
         public DateTime EstimatedDepartureTime
         {
             get
             {
-                return _estimatedDepartureTime;
+                return _estimatedDepartureTime < DepartureTime
+                    ? DepartureTime
+                    : _estimatedDepartureTime;
+
             }
             set
             {
-                if (value < DepartureTime)
-                {
-                    _estimatedDepartureTime = DepartureTime;
-                }
-                else
-                {
-                    _estimatedDepartureTime = value;
-                }
+                _estimatedDepartureTime = value;
             }
         }
         public DateTime EstimatedArrivalTime
@@ -120,16 +101,55 @@ namespace VoyageFramework
 
         private bool IsAvailableForSelling(Person person, int seatNumber, decimal fee)
         {
-            return IsSeatEmpty(seatNumber) && ((IsEmployee(person) && fee >= Route.BasePrice)
-                                                || (fee >= Route.BasePrice * 1.05m))
-                   && IsSeatAvailableFor(seatNumber, person.Gender);
+            return
+                IsSeatEmpty(seatNumber) &&
+                (
+                    (IsEmployee(person) && fee >= Route.BasePrice) ||
+                    (fee >= Route.BasePrice * 1.05m)
+                ) &&
+                IsSeatAvailableFor(seatNumber, person.Gender);
+
 
         }
         private bool IsAvailableForDoubleSelling(Person[] people, int seatNumber, decimal fee)
         {
-            return IsSeatEmpty(seatNumber) && IsSeatEmpty(seatNumber + 1) &&
-                    ((IsEmployee(people[0]) && IsEmployee(people[1]) && fee >= Route.BasePrice) ||
-                    fee >= Route.BasePrice * 1.05m);
+            var nextSeatNumber = GetNextSeatNumber(seatNumber);
+
+            return
+                nextSeatNumber > 0 &&
+                IsSeatEmpty(seatNumber) &&
+                IsSeatEmpty(nextSeatNumber) &&
+                (
+                    (
+                        (IsEmployee(people[0]) || IsEmployee(people[1])) &&
+                        fee >= Route.BasePrice * 2
+                    )
+                    ||
+                    fee >= Route.BasePrice * 2.1m // çift kişinin ücretini kontrol ediyoruz
+                );
+
+        }
+
+        private int GetNextSeatNumber(int seatNumber)
+        {
+            var seatInfo = GetSeatInformation(seatNumber);
+
+            int nextSeatNumber;
+            if (seatInfo.Category == SeatCategory.Corridor)
+            {
+                nextSeatNumber = seatNumber + 1;
+            }
+            else if (seatInfo.Category == SeatCategory.Window)
+            {
+                nextSeatNumber = seatNumber - 1;
+            }
+            else
+            {
+                nextSeatNumber = -1;
+            }
+
+            return nextSeatNumber;
+
         }
 
         private bool IsEmployee(Person person)
@@ -139,11 +159,11 @@ namespace VoyageFramework
 
         private Gender GetGender(int seatNum)
         {
-            for (int i = 0; i < _tickets.Count; i++)
+            for (int i = 0; i < Tickets.Count; i++)
             {
-                if (seatNum == _tickets[i].SeatInformation.Number)
+                if (seatNum == Tickets[i].SeatInformation.Number)
                 {
-                    return _tickets[i].Passenger.Gender;
+                    return Tickets[i].Passenger.Gender;
                 }
             }
 
@@ -152,39 +172,51 @@ namespace VoyageFramework
 
         public void AddDriver(Driver driver)
         {
-            if ((Bus is LuxuryBus && driver.LicenseType != LicenseType.HighLicense) ||
-                Bus is StandardBus && driver.LicenseType == LicenseType.None)
+            if (driver == null)
             {
-                throw new FormatException(nameof(driver.LicenseType));
+                throw new ArgumentNullException(nameof(driver));
+            }
+            else if (
+                        (
+                            Bus is LuxuryBus &&
+                            driver.LicenseType != LicenseType.HighLicense
+                        )
+                        ||
+                        Bus is StandardBus && driver.LicenseType == LicenseType.None
+                    )
+            {
+                throw new
+                    InvalidOperationException("Eklenen sürücünün lisans tipi bu araç için uygun değil.");
+
             }
             else
             {
-                if (_drivers.Count < (int)Math.Ceiling((decimal)Route.Distance / 400) + 1)
+                var maxDriverAllowed = Math.Ceiling((double)Route.Distance / DistancePerDriver);
+                if (Drivers.Count < maxDriverAllowed)
                 {
-                    _drivers.Add(driver);
+                    Drivers.Add(driver);
                 }
             }
-
         }
 
         public void AddHost(Host host)
         {
-            _hosts.Add(host);
+            Hosts.Add(host);
         }
 
         public void RemoveDriver(Driver driver)
         {
-            if (_drivers.Contains(driver))
+            if (Drivers.Contains(driver))
             {
-                _drivers.Remove(driver);
+                Drivers.Remove(driver);
             }
         }
 
         public void RemoveHost(Host host)
         {
-            if (_hosts.Contains(host))
+            if (Hosts.Contains(host))
             {
-                _hosts.Remove(host);
+                Hosts.Remove(host);
             }
         }
 
@@ -197,7 +229,9 @@ namespace VoyageFramework
             }
             else
             {
-                price = seatNumber % 3 == 1 ? Route.BasePrice * 1.25m : price = Route.BasePrice * 1.2m;
+                price = seatNumber % 3 == 1
+                    ? Route.BasePrice * 1.25m
+                    : Route.BasePrice * 1.2m;
             }
             return price;
         }
@@ -208,7 +242,7 @@ namespace VoyageFramework
             if (IsAvailableForSelling(person, seatNumber, fee))
             {
                 ticket = new Ticket(this, GetSeatInformation(seatNumber), person, fee);
-                _tickets.Add(ticket);
+                Tickets.Add(ticket);
             }
 
             return ticket;
@@ -217,30 +251,37 @@ namespace VoyageFramework
         public Ticket[] SellDoubleTickets(Person person01, Person person02, int seatNumber, decimal fee)
         {
             Ticket[] doubleTickets = new Ticket[2];
+            var persons = new Person[2] { person01, person02 };
 
-            if (IsAvailableForDoubleSelling(new Person[2] { person01, person02 }, seatNumber, fee))
+            if (IsAvailableForDoubleSelling(persons, seatNumber, fee))
             {
-                doubleTickets[0] = new Ticket(this, GetSeatInformation(seatNumber), person01, fee);
-                doubleTickets[1] = new Ticket(this, GetSeatInformation(seatNumber + 1), person02, fee);
-                _tickets.Add(doubleTickets[0]);
-                _tickets.Add(doubleTickets[1]);
+                doubleTickets = new Ticket[2];
+                var nextSeatNumber = GetNextSeatNumber(seatNumber);
+                doubleTickets[0] = new Ticket(this, GetSeatInformation(seatNumber), person01, fee / 2);
+                doubleTickets[1] = new Ticket(this, GetSeatInformation(nextSeatNumber), person02, fee / 2);
+                Tickets.Add(doubleTickets[0]);
+                Tickets.Add(doubleTickets[1]);
+            }
+            else
+            {
+                doubleTickets = new Ticket[0];
             }
             return doubleTickets;
         }
 
         public void CancelTicket(Ticket ticket)
         {
-            if (_tickets.Contains(ticket))
+            if (Tickets.Contains(ticket))
             {
-                _tickets.Remove(ticket);
+                Tickets.Remove(ticket);
             }
         }
 
         public bool IsSeatEmpty(int seatNumber)
         {
-            for (int i = 0; i < _tickets.Count; i++)
+            for (int i = 0; i < Tickets.Count; i++)
             {
-                if (_tickets[i].SeatInformation.Number == seatNumber)
+                if (Tickets[i].SeatInformation.Number == seatNumber)
                 {
                     return false;
                 }
@@ -253,30 +294,25 @@ namespace VoyageFramework
         {
             if (GetSeatInformation(seatNumber).Category == SeatCategory.Corridor)
             {
-                if (!IsSeatEmpty(seatNumber + 1))
-                {
-                    return GetGender(seatNumber + 1) == gender;
-                }
-                else
-                {
-                    return true;
-                }
+                var nextSeatNumber = seatNumber + 1;
+                return CheckAvailibilityByNextSeat(nextSeatNumber, gender);
             }
             else if (GetSeatInformation(seatNumber).Category == SeatCategory.Window)
             {
-                if (!IsSeatEmpty(seatNumber - 1))
-                {
-                    return GetGender(seatNumber - 1) == gender;
-                }
-                else
-                {
-                    return true;
-                }
+                var nextSeatNumber = seatNumber - 1;
+                return CheckAvailibilityByNextSeat(nextSeatNumber, gender);
             }
             else
             {
-                return false;
+                return true;
             }
+        }
+
+        private bool CheckAvailibilityByNextSeat(int nextSeatNumber, Gender gender)
+        {
+            return !IsSeatEmpty(nextSeatNumber)
+                ? GetGender(nextSeatNumber) == gender
+                : true;
         }
 
         public SeatInformation GetSeatInformation(int seatNumber)

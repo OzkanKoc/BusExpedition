@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace VoyageFramework.Collections
 {
-    public class TicketCollection
+    public class TicketCollection : IEnumerable
     {
         private Ticket[] _tickets = new Ticket[0];
         public int Count
@@ -31,7 +32,7 @@ namespace VoyageFramework.Collections
         }
         public void Remove(Ticket ticket)
         {
-            for (int i = 0; i < IndexOf(ticket) - 1; i++)
+            for (int i = IndexOf(ticket); i < _tickets.Length - 1; i++)
             {
                 _tickets[i] = _tickets[i + 1];
             }
@@ -51,6 +52,11 @@ namespace VoyageFramework.Collections
                 }
             }
             return false;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

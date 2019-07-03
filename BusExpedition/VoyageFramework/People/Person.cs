@@ -8,6 +8,12 @@ namespace VoyageFramework
 {
     public class Person
     {
+        public Person(string firstName, string lastName)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
         public string FirstName { get; }
         public string LastName { get; }
         public string FullName
@@ -26,15 +32,8 @@ namespace VoyageFramework
             {
                 int age = DateTime.Today.Year - DateOfBirth.Year;
 
-                return DateTime.Today.DayOfYear > DateOfBirth.DayOfYear ? age-- : age;
+                return DateTime.Today.DayOfYear > DateOfBirth.DayOfYear ? --age : age;
             }
         }
-
-        public Person(string firstName, string lastName)
-        {
-            FirstName = firstName;
-            LastName = lastName;
-        }
-
     }
 }

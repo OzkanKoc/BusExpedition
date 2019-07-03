@@ -14,7 +14,7 @@ namespace VoyageFramework
             DateOfBirth = dateOfBirth;
             if (Age < 18)
             {
-                throw new ArgumentException(nameof(dateOfBirth));
+                throw new ArgumentOutOfRangeException(nameof(dateOfBirth));
             }
         }
     }

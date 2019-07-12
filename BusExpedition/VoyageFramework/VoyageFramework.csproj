@@ -42,9 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusExpedition.cs" />
-    <Compile Include="Collections\DriverCollection.cs" />
-    <Compile Include="Collections\HostCollection.cs" />
-    <Compile Include="Collections\TicketCollection.cs" />
+    <Compile Include="Collections\ListCollection.cs" />
     <Compile Include="SeatCategory.cs" />
     <Compile Include="SeatInformation.cs" />
     <Compile Include="SeatSection.cs" />

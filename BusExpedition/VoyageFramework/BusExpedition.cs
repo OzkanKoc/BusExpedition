@@ -13,6 +13,9 @@ namespace VoyageFramework
         private int _codeSuffix;
         private DateTime _estimatedDepartureTime;
         private Bus _bus;
+        private ListCollection<Driver> _drivers = new ListCollection<Driver>();
+        private ListCollection<Host> _hosts = new ListCollection<Host>();
+        private ListCollection<Ticket> _tickets = new ListCollection<Ticket>();
 
         public BusExpedition(Route route, DateTime departureTime)
         {
@@ -63,9 +66,12 @@ namespace VoyageFramework
             }
         }
         public Route Route { get; }
-        public DriverCollection Drivers { get; }
-        public HostCollection Hosts { get; }
-        private TicketCollection Tickets { get; }
+        //public DriverCollection Drivers { get; }
+        private ListCollection<Driver> Drivers => _drivers;
+        //public HostCollection Hosts { get; }
+        private ListCollection<Host> Hosts => _hosts;
+        //private TicketCollection Tickets { get; }
+        private ListCollection<Ticket> Tickets => _tickets;
         public DateTime DepartureTime { get; }
         public DateTime EstimatedDepartureTime
         {

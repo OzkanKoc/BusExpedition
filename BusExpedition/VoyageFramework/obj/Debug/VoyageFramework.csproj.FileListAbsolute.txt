@@ -1,0 +1,6 @@
+E:\GithubBusExpedition\BusExpedition\VoyageFramework\bin\Debug\VoyageFramework.dll
+E:\GithubBusExpedition\BusExpedition\VoyageFramework\bin\Debug\VoyageFramework.pdb
+E:\GithubBusExpedition\BusExpedition\VoyageFramework\obj\Debug\VoyageFramework.csprojAssemblyReference.cache
+E:\GithubBusExpedition\BusExpedition\VoyageFramework\obj\Debug\VoyageFramework.csproj.CoreCompileInputs.cache
+E:\GithubBusExpedition\BusExpedition\VoyageFramework\obj\Debug\VoyageFramework.dll
+E:\GithubBusExpedition\BusExpedition\VoyageFramework\obj\Debug\VoyageFramework.pdb

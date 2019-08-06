@@ -42,7 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusExpedition.cs" />
-    <Compile Include="Collections\ListCollection.cs" />
+    <Compile Include="Collection\Enumerator.cs" />
+    <Compile Include="Collection\ListCollection.cs" />
     <Compile Include="SeatCategory.cs" />
     <Compile Include="SeatInformation.cs" />
     <Compile Include="SeatSection.cs" />

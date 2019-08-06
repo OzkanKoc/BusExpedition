@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-//will generated ienumerator
-namespace VoyageFramework.Collections
+
+namespace VoyageFramework.Collection
 {
-    public class ListCollection<TEntity> : IEnumerable where TEntity : class
+    public class ListCollection<TEntity> : ICollection
     {
         private TEntity[] _array = new TEntity[0];
         public int Count
@@ -17,6 +13,10 @@ namespace VoyageFramework.Collections
                 return _array.Length;
             }
         }
+
+        public object SyncRoot => this;
+
+        public bool IsSynchronized => false;
 
         public TEntity this[int index]
         {
@@ -44,10 +44,8 @@ namespace VoyageFramework.Collections
         {
             for (int i = 0; i < _array.Length; i++)
             {
-                if (tObject == _array[i])
-                {
+                if (Equals(tObject, _array[i]))
                     return true;
-                }
             }
             return false;
         }
@@ -57,9 +55,27 @@ namespace VoyageFramework.Collections
             return Array.IndexOf(_array, tObject);
         }
 
-        public IEnumerator GetEnumerator()
+        public void CopyTo(TEntity[] array)
         {
-            return GetEnumerator();
+            CopyTo(array, 0);
         }
+        public void CopyTo(Array array, int index)
+        {
+            if (array.GetType() != _array.GetType())
+            {
+                throw new InvalidCastException("Liste tipi ile dizi tipi uyuşmuyor.");
+            }
+            if (array.Rank != 1)
+            {
+                throw new RankException("Dizi boyutu uygun değil.");
+            }
+            if ((array.Length < _array.Length + index))
+            {
+                throw new ArgumentOutOfRangeException("Dizi aralık dışında.");
+            }
+            if ((array != null))
+                Array.Copy(_array, 0, array, index, _array.Length);
+        }
+        IEnumerator IEnumerable.GetEnumerator() => new Enumerator(_array);
     }
 }

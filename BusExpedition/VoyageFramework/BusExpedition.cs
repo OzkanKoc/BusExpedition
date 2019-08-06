@@ -1,5 +1,5 @@
 ﻿using System;
-using VoyageFramework.Collections;
+using VoyageFramework.Collection;
 
 namespace VoyageFramework
 {
@@ -13,15 +13,15 @@ namespace VoyageFramework
         private int _codeSuffix;
         private DateTime _estimatedDepartureTime;
         private Bus _bus;
-        private ListCollection<Driver> _drivers = new ListCollection<Driver>();
-        private ListCollection<Host> _hosts = new ListCollection<Host>();
-        private ListCollection<Ticket> _tickets = new ListCollection<Ticket>();
 
         public BusExpedition(Route route, DateTime departureTime)
         {
             DepartureTime = departureTime;
             Route = route;
             EstimatedDepartureTime = departureTime;
+            Drivers = new ListCollection<Driver>();
+            Hosts = new ListCollection<Host>();
+            Tickets = new ListCollection<Ticket>();
 
             var random = new Random();
             _codeSuffix = random.Next(MinSuffixValue, MaxSuffixValue);
@@ -65,13 +65,10 @@ namespace VoyageFramework
                 }
             }
         }
+        public ListCollection<Driver> Drivers { get; }
+        public ListCollection<Host> Hosts { get; }
+        public ListCollection<Ticket> Tickets { get; }
         public Route Route { get; }
-        //public DriverCollection Drivers { get; }
-        private ListCollection<Driver> Drivers => _drivers;
-        //public HostCollection Hosts { get; }
-        private ListCollection<Host> Hosts => _hosts;
-        //private TicketCollection Tickets { get; }
-        private ListCollection<Ticket> Tickets => _tickets;
         public DateTime DepartureTime { get; }
         public DateTime EstimatedDepartureTime
         {
@@ -80,7 +77,6 @@ namespace VoyageFramework
                 return _estimatedDepartureTime < DepartureTime
                     ? DepartureTime
                     : _estimatedDepartureTime;
-
             }
             set
             {
@@ -114,8 +110,6 @@ namespace VoyageFramework
                     (fee >= Route.BasePrice * 1.05m)
                 ) &&
                 IsSeatAvailableFor(seatNumber, person.Gender);
-
-
         }
         private bool IsAvailableForDoubleSelling(Person[] people, int seatNumber, decimal fee)
         {
@@ -133,7 +127,6 @@ namespace VoyageFramework
                     ||
                     fee >= Route.BasePrice * 2.1m // çift kişinin ücretini kontrol ediyoruz
                 );
-
         }
 
         private int GetNextSeatNumber(int seatNumber)
@@ -155,7 +148,6 @@ namespace VoyageFramework
             }
 
             return nextSeatNumber;
-
         }
 
         private bool IsEmployee(Person person)
